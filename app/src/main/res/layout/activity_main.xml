@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:text="New Button"
         android:id="@+id/button"
-        android:onClick="btnGetWeather"
+        android:onClick="btnFindCity"
         />
 
     <Spinner
@@ -32,6 +32,13 @@
         android:text="CLICK"
         android:id="@+id/button2"
         android:onClick="btnGetLain"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="subuh ="
+        android:id="@+id/prayerTimeTxt"
         />
 
     <TextView

@@ -22,12 +22,16 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.DataFormatException;
+
+import java.util.*;
 
 
 public class MainActivity extends ActionBarActivity
@@ -37,16 +41,20 @@ public class MainActivity extends ActionBarActivity
     List<String> spinnerArray = null;
     ArrayAdapter<String> customAdapter = null;
     Spinner spinnerHasil;
-    TextView debugTextView;
+    TextView debugTextView, prayerTextView;
     JSONArray results; //taruh di global, biar bisa diakses pas nganu :3
+    Date dateNow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        dateNow = new Date();
+
         spinnerHasil = (Spinner)findViewById(R.id.SpinnerHasil);
         debugTextView = (TextView)findViewById(R.id.debugText);
+        prayerTextView = (TextView)findViewById(R.id.prayerTimeTxt);
 
         spinnerArray = new ArrayList<>();
     }
@@ -73,14 +81,7 @@ public class MainActivity extends ActionBarActivity
         return super.onOptionsItemSelected(item);
     }
 
-    public void btnGetWeather(View view) {
-        String txtLat = "37.37749";
-        String txtLong = "-122.419416";
 
-        new ReadWeatherJSONFeedTask().execute(
-                "https://maps.googleapis.com/maps/api/geocode/json?address=kalasan&key="
-                        + apiKey);
-    }
 
 
 
@@ -112,7 +113,7 @@ public class MainActivity extends ActionBarActivity
         return stringBuilder.toString();
     }
 
-    private class ReadWeatherJSONFeedTask extends AsyncTask<String, Void, String> {
+    private class FindCityByGoogleMaps extends AsyncTask<String, Void, String> {
 
 
         protected String doInBackground(String... urls) {
@@ -142,12 +143,55 @@ public class MainActivity extends ActionBarActivity
             }
             catch (Exception e)
             {
-                Log.d("ReadWeatherJSONFeedTask", e.getLocalizedMessage());
+                Log.d("FindCityByGoogleMaps", e.getLocalizedMessage());
             }
         }
     }
 
-    public void btnGetLain(View view) {
+    private class GetPrayerTime extends AsyncTask<String, Void, String> {
+
+
+        protected String doInBackground(String... urls) {
+            return readJSONFeed(urls[0]);
+        }
+
+
+        protected void onPostExecute(String result)
+        {
+            try
+            {
+                JSONObject jsonObj = new JSONObject(result);
+                JSONObject temp = jsonObj.getJSONObject(Integer.toString(dateNow.getDate()));
+
+                prayerTextView.setText("Imsyak = "+temp.getString("Imsaak")+"\n"+
+                                "Terbit = "+temp.getString("Sunrise")+"\n"+
+                                "Dzuhur = "+temp.getString("Dhuhr")+"\n"+
+                                "Ashar = "+temp.getString("Asr")+"\n"+
+                                "Terbenam = "+temp.getString("Sunset")+"\n"+
+                                "Maghrib = "+temp.getString("Maghrib")+"\n"+
+                                "Isya' = "+temp.getString("Isha")+"\n"
+                );
+
+            }
+            catch (Exception e)
+            {
+                Log.d("GetPrayerTime", e.getLocalizedMessage());
+            }
+        }
+    }
+
+
+
+    public void btnFindCity(View view)
+    {
+        //kudune udu kalasan, tapi njupuk data seko edittext
+
+        new FindCityByGoogleMaps().execute(
+                "https://maps.googleapis.com/maps/api/geocode/json?address=kalasan&key=" + apiKey);
+    }
+
+    public void btnGetLain(View view)
+    {
         spinnerHasil = (Spinner)findViewById(R.id.SpinnerHasil);
 
         if(spinnerHasil.getSelectedItemPosition()!=-1)
@@ -158,7 +202,13 @@ public class MainActivity extends ActionBarActivity
                 r = results.getJSONObject(spinnerHasil.getSelectedItemPosition());
                 JSONObject temp = r.getJSONObject("geometry");
                 r = temp.getJSONObject("location");
-                debugTextView.setText(r.getString("lat")+", "+r.getString("lng"));
+                debugTextView.setText(Integer.toString(dateNow.getDate())+"/"+Integer.toString(dateNow.getMonth()+1)+"/"+Integer.toString(dateNow.getYear()+1900));
+
+
+                new GetPrayerTime().execute(
+                        "http://praytime.info/getprayertimes.php?lat="+r.getString("lat")+"&lon="+r.getString("lng")+"&gmt=420&m="+Integer.toString(dateNow.getMonth() + 1)+"&y="+Integer.toString(dateNow.getYear()+1900)
+                        );
+
             }
             catch (JSONException e)
             {

@@ -7,7 +7,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
@@ -22,6 +25,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -29,11 +33,20 @@ public class MainActivity extends ActionBarActivity
 {
 
     String apiKey = "AIzaSyA5csgc61wsvMf5QBumMTzEZLZ9pavLPlA";
-        
+    List<String> spinnerArray = null;
+    ArrayAdapter<String> customAdapter = null;
+    Spinner spinnerHasil;
+    TextView debugTextView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        spinnerHasil = (Spinner)findViewById(R.id.SpinnerHasil);
+        debugTextView = (TextView)findViewById(R.id.debugText);
+
+        spinnerArray = new ArrayList<>();
     }
 
     @Override
@@ -99,23 +112,37 @@ public class MainActivity extends ActionBarActivity
 
     private class ReadWeatherJSONFeedTask extends AsyncTask<String, Void, String> {
 
+
         protected String doInBackground(String... urls) {
             return readJSONFeed(urls[0]);
         }
 
 
-        protected void onPostExecute(String result) {
-            try {
+        protected void onPostExecute(String result)
+        {
+            try
+            {
+                String test = null;
+
                 JSONObject jsonObj = new JSONObject(result);
-
                 JSONArray results = jsonObj.getJSONArray("results");
-                JSONObject r = results.getJSONObject(0);
 
-                Toast.makeText(getBaseContext(),
-                        r.getString("formatted_address"),
-                        Toast.LENGTH_SHORT).show();
 
-            } catch (Exception e) {
+                customAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, spinnerArray);
+                customAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+                for(int i=0; i<results.length()-1; i++)
+                {
+                    JSONObject r = results.getJSONObject(i);
+                    spinnerArray.add(r.getString("formatted_address"));
+                }
+                spinnerHasil.setAdapter(customAdapter);
+
+                debugTextView.setText(Integer.toString(results.length()));
+
+            }
+            catch (Exception e)
+            {
                 Log.d("ReadWeatherJSONFeedTask", e.getLocalizedMessage());
             }
         }

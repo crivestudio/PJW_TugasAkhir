@@ -1,5 +1,7 @@
 package com.crivestudio.pjw_tugasakhir;
 
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -120,6 +122,8 @@ public class MainActivity extends ActionBarActivity
         {
             try
             {
+                spinnerArray.clear();
+                
                 JSONObject jsonObj = new JSONObject(result);
                 results = jsonObj.getJSONArray("results");
 
@@ -212,17 +216,26 @@ public class MainActivity extends ActionBarActivity
     {
         String temp = "";
         temp = inputTextEdit.getText().toString();
-        
-        if(temp.matches(""))
+
+        if(!connectionAvailable())
         {
-            Toast.makeText(getApplicationContext(),"ISI LOKASI DULU",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"Cek internet dulu",Toast.LENGTH_SHORT).show();
         }
         else
         {
-            new FindCityByGoogleMaps().execute(
-                    "https://maps.googleapis.com/maps/api/geocode/json?address="+inputTextEdit.getText().toString()
-                            +"&key=" + apiKey);
+            if(temp.matches(""))
+            {
+                Toast.makeText(getApplicationContext(),"Isi lokasi dulu",Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                new FindCityByGoogleMaps().execute(
+                        "https://maps.googleapis.com/maps/api/geocode/json?address="+inputTextEdit.getText().toString()
+                                +"&key=" + apiKey);
+            }
         }
+
+
 
     }
 
@@ -255,5 +268,13 @@ public class MainActivity extends ActionBarActivity
                 e.printStackTrace();
             }
         }
+    }
+
+    public boolean connectionAvailable()
+    {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(MainActivity.this.CONNECTIVITY_SERVICE);
+        NetworkInfo ni = cm.getActiveNetworkInfo();
+        if (null == ni) return false;
+        return ni.isConnectedOrConnecting();
     }
 }

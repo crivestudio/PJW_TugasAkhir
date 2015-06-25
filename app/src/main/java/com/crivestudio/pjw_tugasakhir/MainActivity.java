@@ -20,6 +20,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -37,6 +38,7 @@ public class MainActivity extends ActionBarActivity
     ArrayAdapter<String> customAdapter = null;
     Spinner spinnerHasil;
     TextView debugTextView;
+    JSONArray results; //taruh di global, biar bisa diakses pas nganu :3
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,8 +127,7 @@ public class MainActivity extends ActionBarActivity
                 String test = null;
 
                 JSONObject jsonObj = new JSONObject(result);
-                JSONArray results = jsonObj.getJSONArray("results");
-
+                results = jsonObj.getJSONArray("results");
 
                 customAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, spinnerArray);
                 customAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -137,9 +138,7 @@ public class MainActivity extends ActionBarActivity
                     spinnerArray.add(r.getString("formatted_address"));
                 }
                 spinnerHasil.setAdapter(customAdapter);
-
                 debugTextView.setText(Integer.toString(results.length()));
-
             }
             catch (Exception e)
             {
@@ -147,4 +146,28 @@ public class MainActivity extends ActionBarActivity
             }
         }
     }
+
+    public void btnGetLain(View view) {
+        spinnerHasil = (Spinner)findViewById(R.id.SpinnerHasil);
+
+        if(spinnerHasil.getSelectedItemPosition()!=-1)
+        {
+            JSONObject r;
+            try
+            {
+                r = results.getJSONObject(spinnerHasil.getSelectedItemPosition());
+                JSONObject temp = r.getJSONObject("geometry");
+                r = temp.getJSONObject("location");
+                debugTextView.setText(r.getString("lat")+", "+r.getString("lng"));
+            }
+            catch (JSONException e)
+            {
+                e.printStackTrace();
+            }
+
+        }
+
+
+    }
+
 }

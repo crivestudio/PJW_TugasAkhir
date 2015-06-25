@@ -22,14 +22,12 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.DataFormatException;
 
 import java.util.*;
 
@@ -83,10 +81,6 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-
-
-
-
     public String readJSONFeed(String URL) {
         StringBuilder stringBuilder = new StringBuilder();
         HttpClient httpClient = new DefaultHttpClient();
@@ -126,8 +120,6 @@ public class MainActivity extends ActionBarActivity
         {
             try
             {
-                String test = null;
-
                 JSONObject jsonObj = new JSONObject(result);
                 results = jsonObj.getJSONArray("results");
 
@@ -140,7 +132,6 @@ public class MainActivity extends ActionBarActivity
                     spinnerArray.add(r.getString("formatted_address"));
                 }
                 spinnerHasil.setAdapter(customAdapter);
-                //debugTextView.setText(Integer.toString(results.length()));
             }
             catch (Exception e)
             {
@@ -149,9 +140,11 @@ public class MainActivity extends ActionBarActivity
         }
     }
 
-    private class GetPrayerTime extends AsyncTask<String, Void, String> {
+    private class GetPrayerTime extends AsyncTask<String, Void, String>
+    {
 
-        protected String doInBackground(String... urls) {
+        protected String doInBackground(String... urls)
+        {
             return readJSONFeed(urls[0]);
         }
 
@@ -181,9 +174,11 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-    private class GetTempatSekitar extends AsyncTask<String, Void, String> {
+    private class GetTempatSekitar extends AsyncTask<String, Void, String>
+    {
 
-        protected String doInBackground(String... urls) {
+        protected String doInBackground(String... urls)
+        {
             return readJSONFeed(urls[0]);
         }
 
@@ -213,20 +208,20 @@ public class MainActivity extends ActionBarActivity
     }
 
 
-
-
     public void btnFindCity(View view)
     {
-        //kudune udu kalasan, tapi njupuk data seko edittext
-        if(inputTextEdit.getText().toString()!="")
+        String temp = "";
+        temp = inputTextEdit.getText().toString();
+        
+        if(temp.matches(""))
+        {
+            Toast.makeText(getApplicationContext(),"ISI LOKASI DULU",Toast.LENGTH_SHORT).show();
+        }
+        else
         {
             new FindCityByGoogleMaps().execute(
                     "https://maps.googleapis.com/maps/api/geocode/json?address="+inputTextEdit.getText().toString()
                             +"&key=" + apiKey);
-        }
-        else
-        {
-            Toast.makeText(getApplicationContext(),"ISI LOKASI DULU",Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -243,14 +238,15 @@ public class MainActivity extends ActionBarActivity
                 r = results.getJSONObject(spinnerHasil.getSelectedItemPosition());
                 JSONObject temp = r.getJSONObject("geometry");
                 r = temp.getJSONObject("location");
-                //debugTextView.setText(Integer.toString(dateNow.getDate())+"/"+Integer.toString(dateNow.getMonth()+1)+"/"+Integer.toString(dateNow.getYear()+1900));
 
                 new GetPrayerTime().execute(
-                        "http://praytime.info/getprayertimes.php?lat="+r.getString("lat")+"&lon="+r.getString("lng")+"&gmt=420&m="+Integer.toString(dateNow.getMonth() + 1)+"&y="+Integer.toString(dateNow.getYear()+1900)
+                        "http://praytime.info/getprayertimes.php?lat="+r.getString("lat")+"&lon="+r.getString("lng")+"&gmt=420&m="+
+                                Integer.toString(dateNow.getMonth() + 1)+"&y="+Integer.toString(dateNow.getYear()+1900)
                         );
 
                 new GetTempatSekitar().execute(
-                        "http://api.geonames.org/findNearbyWikipediaJSON?formatted=true&lat="+r.getString("lat")+"&lng="+r.getString("lng")+"&username=thoriq&style=full"
+                        "http://api.geonames.org/findNearbyWikipediaJSON?formatted=true&lat="+r.getString("lat")+"&lng="+
+                                r.getString("lng")+"&username=thoriq&style=full"
                 );
 
             }
@@ -258,10 +254,6 @@ public class MainActivity extends ActionBarActivity
             {
                 e.printStackTrace();
             }
-
         }
-
-
     }
-
 }

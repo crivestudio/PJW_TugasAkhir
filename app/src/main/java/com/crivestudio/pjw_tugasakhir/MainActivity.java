@@ -44,6 +44,7 @@ public class MainActivity extends ActionBarActivity
     TextView debugTextView, prayerTextView;
     JSONArray results; //taruh di global, biar bisa diakses pas nganu :3
     Date dateNow;
+    EditText inputTextEdit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +56,7 @@ public class MainActivity extends ActionBarActivity
         spinnerHasil = (Spinner)findViewById(R.id.SpinnerHasil);
         debugTextView = (TextView)findViewById(R.id.debugText);
         prayerTextView = (TextView)findViewById(R.id.prayerTimeTxt);
-
+        inputTextEdit = (EditText)findViewById(R.id.inputText);
         spinnerArray = new ArrayList<>();
     }
 
@@ -133,13 +134,13 @@ public class MainActivity extends ActionBarActivity
                 customAdapter = new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, spinnerArray);
                 customAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-                for(int i=0; i<results.length()-1; i++)
+                for(int i=0; i<results.length(); i++)
                 {
                     JSONObject r = results.getJSONObject(i);
                     spinnerArray.add(r.getString("formatted_address"));
                 }
                 spinnerHasil.setAdapter(customAdapter);
-                debugTextView.setText(Integer.toString(results.length()));
+                //debugTextView.setText(Integer.toString(results.length()));
             }
             catch (Exception e)
             {
@@ -149,7 +150,6 @@ public class MainActivity extends ActionBarActivity
     }
 
     private class GetPrayerTime extends AsyncTask<String, Void, String> {
-
 
         protected String doInBackground(String... urls) {
             return readJSONFeed(urls[0]);
@@ -163,13 +163,13 @@ public class MainActivity extends ActionBarActivity
                 JSONObject jsonObj = new JSONObject(result);
                 JSONObject temp = jsonObj.getJSONObject(Integer.toString(dateNow.getDate()));
 
-                prayerTextView.setText("Imsyak = "+temp.getString("Imsaak")+"\n"+
-                                "Terbit = "+temp.getString("Sunrise")+"\n"+
-                                "Dzuhur = "+temp.getString("Dhuhr")+"\n"+
-                                "Ashar = "+temp.getString("Asr")+"\n"+
-                                "Terbenam = "+temp.getString("Sunset")+"\n"+
-                                "Maghrib = "+temp.getString("Maghrib")+"\n"+
-                                "Isya' = "+temp.getString("Isha")+"\n"
+                prayerTextView.setText("Imsyak = " + temp.getString("Imsaak") + "\t\t" +
+                                "Terbit = " + temp.getString("Sunrise") + "\n" +
+                                "Dzuhur = " + temp.getString("Dhuhr") + "\t\t" +
+                                "Ashar = " + temp.getString("Asr") + "\n" +
+                                "Terbenam = " + temp.getString("Sunset") + "\t\t" +
+                                "Maghrib = " + temp.getString("Maghrib") + "\n" +
+                                "Isya' = " + temp.getString("Isha")
                 );
 
             }
@@ -181,13 +181,54 @@ public class MainActivity extends ActionBarActivity
     }
 
 
+    private class GetTempatSekitar extends AsyncTask<String, Void, String> {
+
+        protected String doInBackground(String... urls) {
+            return readJSONFeed(urls[0]);
+        }
+
+
+        protected void onPostExecute(String result)
+        {
+            try
+            {
+                String hasil = "";
+
+                JSONObject jsonObj = new JSONObject(result);
+                JSONArray geonames = jsonObj.getJSONArray("geonames");
+
+                for(int i=0; i<geonames.length(); i++)
+                {
+                    JSONObject r = geonames.getJSONObject(i);
+                    hasil=hasil+Integer.toString(i+1)+". "+r.getString("title")+" ("+r.getString("lat")+", "+r.getString("lng")+")\n"+
+                            r.getString("summary")+"\n\n\n";
+                }
+                debugTextView.setText(hasil);
+            }
+            catch (Exception e)
+            {
+                Log.d("GetTempatSekitar", e.getLocalizedMessage());
+            }
+        }
+    }
+
+
+
 
     public void btnFindCity(View view)
     {
         //kudune udu kalasan, tapi njupuk data seko edittext
+        if(inputTextEdit.getText().toString()!="")
+        {
+            new FindCityByGoogleMaps().execute(
+                    "https://maps.googleapis.com/maps/api/geocode/json?address="+inputTextEdit.getText().toString()
+                            +"&key=" + apiKey);
+        }
+        else
+        {
+            Toast.makeText(getApplicationContext(),"ISI LOKASI DULU",Toast.LENGTH_SHORT).show();
+        }
 
-        new FindCityByGoogleMaps().execute(
-                "https://maps.googleapis.com/maps/api/geocode/json?address=kalasan&key=" + apiKey);
     }
 
     public void btnGetLain(View view)
@@ -202,12 +243,15 @@ public class MainActivity extends ActionBarActivity
                 r = results.getJSONObject(spinnerHasil.getSelectedItemPosition());
                 JSONObject temp = r.getJSONObject("geometry");
                 r = temp.getJSONObject("location");
-                debugTextView.setText(Integer.toString(dateNow.getDate())+"/"+Integer.toString(dateNow.getMonth()+1)+"/"+Integer.toString(dateNow.getYear()+1900));
-
+                //debugTextView.setText(Integer.toString(dateNow.getDate())+"/"+Integer.toString(dateNow.getMonth()+1)+"/"+Integer.toString(dateNow.getYear()+1900));
 
                 new GetPrayerTime().execute(
                         "http://praytime.info/getprayertimes.php?lat="+r.getString("lat")+"&lon="+r.getString("lng")+"&gmt=420&m="+Integer.toString(dateNow.getMonth() + 1)+"&y="+Integer.toString(dateNow.getYear()+1900)
                         );
+
+                new GetTempatSekitar().execute(
+                        "http://api.geonames.org/findNearbyWikipediaJSON?formatted=true&lat="+r.getString("lat")+"&lng="+r.getString("lng")+"&username=thoriq&style=full"
+                );
 
             }
             catch (JSONException e)

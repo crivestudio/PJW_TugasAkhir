@@ -54,6 +54,7 @@ public class MainActivity extends ActionBarActivity {
 
     private class ReadWeatherJSONFeedTask extends AsyncTask<String, Void, String> {
 
+        //test commit
         protected String doInBackground(String... urls) {
             return readJSONFeed(urls[0]);
         }

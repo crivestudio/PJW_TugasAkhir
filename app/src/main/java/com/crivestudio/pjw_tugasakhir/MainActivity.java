@@ -1,16 +1,20 @@
 package com.crivestudio.pjw_tugasakhir;
 
+import android.app.Activity;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.os.Handler;
+import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,7 +38,7 @@ import java.util.List;
 import java.util.*;
 
 
-public class MainActivity extends ActionBarActivity
+public class MainActivity extends Activity
 {
 
     String apiKey = "AIzaSyA5csgc61wsvMf5QBumMTzEZLZ9pavLPlA";
@@ -47,6 +51,10 @@ public class MainActivity extends ActionBarActivity
     EditText inputTextEdit;
     View hasilws;
     View hasilws2;
+    private final int SPLASH_DISPLAY_LENGTH = 1000;
+    public static ImageView Splash;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +72,8 @@ public class MainActivity extends ActionBarActivity
         hasilws.setVisibility(View.INVISIBLE);
         hasilws2 = (View) findViewById(R.id.hasilws2);
         hasilws2.setVisibility(View.INVISIBLE);
+
+
     }
 
     @Override
@@ -166,13 +176,13 @@ public class MainActivity extends ActionBarActivity
                 JSONObject jsonObj = new JSONObject(result);
                 JSONObject temp = jsonObj.getJSONObject(Integer.toString(dateNow.getDate()));
 
-                prayerTextView.setText("Imsyak = " + temp.getString("Imsaak") + "\t\t" +
+                prayerTextView.setText("Imsyak      = " + temp.getString("Imsaak") + "\t\t" +
                                 "Terbit = " + temp.getString("Sunrise") + "\n" +
-                                "Dzuhur = " + temp.getString("Dhuhr") + "\t\t" +
+                                "Dzuhur      = " + temp.getString("Dhuhr") + "\t\t" +
                                 "Ashar = " + temp.getString("Asr") + "\n" +
                                 "Terbenam = " + temp.getString("Sunset") + "\t\t" +
                                 "Maghrib = " + temp.getString("Maghrib") + "\n" +
-                                "Isya' = " + temp.getString("Isha")
+                                "Isya'          = " + temp.getString("Isha")
                 );
 
             }

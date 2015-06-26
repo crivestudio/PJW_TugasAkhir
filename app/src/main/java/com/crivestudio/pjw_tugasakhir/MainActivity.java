@@ -45,6 +45,8 @@ public class MainActivity extends ActionBarActivity
     JSONArray results; //taruh di global, biar bisa diakses pas nganu :3
     Date dateNow;
     EditText inputTextEdit;
+    View hasilws;
+    View hasilws2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +60,10 @@ public class MainActivity extends ActionBarActivity
         prayerTextView = (TextView)findViewById(R.id.prayerTimeTxt);
         inputTextEdit = (EditText)findViewById(R.id.inputText);
         spinnerArray = new ArrayList<>();
+        hasilws = (View) findViewById(R.id.hasilws1);
+        hasilws.setVisibility(View.INVISIBLE);
+        hasilws2 = (View) findViewById(R.id.hasilws2);
+        hasilws2.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -214,18 +220,20 @@ public class MainActivity extends ActionBarActivity
 
     public void btnFindCity(View view)
     {
+        hasilws.setVisibility(View.VISIBLE);
+
         String temp = "";
         temp = inputTextEdit.getText().toString();
 
         if(!connectionAvailable())
         {
-            Toast.makeText(getApplicationContext(),"Cek internet dulu",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"Periksa koneksi internet anda",Toast.LENGTH_SHORT).show();
         }
         else
         {
             if(temp.matches(""))
             {
-                Toast.makeText(getApplicationContext(),"Isi lokasi dulu",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"Masikkan lokasi anda",Toast.LENGTH_SHORT).show();
             }
             else
             {
@@ -241,6 +249,7 @@ public class MainActivity extends ActionBarActivity
 
     public void btnGetLain(View view)
     {
+
         spinnerHasil = (Spinner)findViewById(R.id.SpinnerHasil);
 
         if(spinnerHasil.getSelectedItemPosition()!=-1)

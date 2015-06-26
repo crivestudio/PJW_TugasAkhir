@@ -249,6 +249,7 @@ public class MainActivity extends ActionBarActivity
 
     public void btnGetLain(View view)
     {
+        hasilws2.setVisibility(View.VISIBLE);
 
         spinnerHasil = (Spinner)findViewById(R.id.SpinnerHasil);
 
